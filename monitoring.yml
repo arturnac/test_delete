@@ -1,43 +1,30 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: monitoring
+  name: monitoring-prom
 data:
-  prometheus.yml: |
+  metrics-prometheus.yml: |
     global:
-      scrape_interval:     10s
+      scrape_interval:     5s
       external_labels:
-        monitor: 'metrics-monitor'
+        monitor: 'metrics-monitor-prom'
 
     scrape_configs:
-    - job_name: monitoring
+      - job_name: monitoring/monitoring-prometheus
         honor_timestamps: true
-        scrape_interval: 5s
-
+        scrape_interval: 30s
+        scrape_timeout: 10s
         metrics_path: /metrics
         scheme: http
-
         kubernetes_sd_configs:
           - role: endpoints
-        namespaces:
-          names:
-          - mod-pm-dev-01
-          - mod-pm-dev-02
-          - mod-pm-tst-01
-          - mod-pm-mtr
-          - mod-pm-int-01
-          - mod-pm-int-03
-          - mod-pm-int-04
-          - mod-pm-int-05
-          - mod-pm-int-06
-          - mod-pm-int-07
-          - mod-pm-nft-01
-          - mod-pm-nft-03
-          - mod-pm-nft-04
+            namespaces:
+              names:
+              - mod-pm-dev-02
         relabel_configs:
           - source_labels: [__meta_kubernetes_service_label_app]
             separator: ;
-            regex: prometheus-node-exporter
+            regex: prometheus-operator-prometheus
             replacement: $1
             action: keep
           - source_labels: [__meta_kubernetes_service_label_release]
@@ -45,9 +32,14 @@ data:
             regex: monitoring
             replacement: $1
             action: keep
+          - source_labels: [__meta_kubernetes_service_label_self_monitor]
+            separator: ;
+            regex: "true"
+            replacement: $1
+            action: keep
           - source_labels: [__meta_kubernetes_endpoint_port_name]
             separator: ;
-            regex: metrics
+            regex: web
             replacement: $1
             action: keep
           - source_labels: [__meta_kubernetes_endpoint_address_target_kind, __meta_kubernetes_endpoint_address_target_name]
@@ -86,14 +78,8 @@ data:
             target_label: job
             replacement: ${1}
             action: replace
-          - source_labels: [__meta_kubernetes_service_label_jobLabel]
-            separator: ;
-            regex: (.+)
-            target_label: job
-            replacement: ${1}
-            action: replace
           - separator: ;
             regex: (.*)
             target_label: endpoint
-            replacement: metrics
+            replacement: web
             action: replace
