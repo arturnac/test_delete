@@ -1,42 +1,48 @@
-global:
-  scrape_interval:     10s
-  external_labels:
-    monitor: 'metrics-monitor'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8t
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     10s
+      external_labels:
+        monitor: 'metrics-monitor'
 
-  metrics_path: /metrics
-  scheme: http
-  
-  kubernetes_sd_configs:
-  - role: node
-    namespaces:
-      names:
-      - mod-pm-dev-01
-      - mod-pm-dev-02
-      - mod-pm-tst-01
-      - mod-pm-mtr
-      - mod-pm-int-01
-      - mod-pm-int-03
-      - mod-pm-int-04
-      - mod-pm-int-05
-      - mod-pm-int-06
-      - mod-pm-int-07
-      - mod-pm-nft-01
-      - mod-pm-nft-03
-      - mod-pm-nft-04
-      - mod-pm-tst-02
+      metrics_path: /metrics
+      scheme: http
 
-    relabel_configs:
-    - action: labelmap
-        regex: __meta_kubernetes_node_label_(.+)
+      kubernetes_sd_configs:
+      - role: node
+        namespaces:
+          names:
+          - mod-pm-dev-01
+          - mod-pm-dev-02
+          - mod-pm-tst-01
+          - mod-pm-mtr
+          - mod-pm-int-01
+          - mod-pm-int-03
+          - mod-pm-int-04
+          - mod-pm-int-05
+          - mod-pm-int-06
+          - mod-pm-int-07
+          - mod-pm-nft-01
+          - mod-pm-nft-03
+          - mod-pm-nft-04
+          - mod-pm-tst-02
 
-    metric_relabel_configs:
-    - action: replace
-      source_labels: [id]
-      regex: '^/machine\.slice/machine-rkt\\x2d([^\\]+)\\.+/([^/]+)\.service$'
-      target_label: rkt_container_name
-      replacement: '${2}-${1}'
-    - action: replace
-      ource_labels: [id]
-      regex: '^/system\.slice/(.+)\.service$'
-      target_label: systemd_service_name
-      replacement: '${1}'
+        relabel_configs:
+        - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+
+        metric_relabel_configs:
+        - action: replace
+          source_labels: [id]
+          regex: '^/machine\.slice/machine-rkt\\x2d([^\\]+)\\.+/([^/]+)\.service$'
+          target_label: rkt_container_name
+          replacement: '${2}-${1}'
+        - action: replace
+          ource_labels: [id]
+          regex: '^/system\.slice/(.+)\.service$'
+          target_label: systemd_service_name
+          replacement: '${1}'
