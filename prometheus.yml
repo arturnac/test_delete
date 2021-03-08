@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: monitoring2
+  name: monitoring
 data:
   prometheus.yml: |
     global:
