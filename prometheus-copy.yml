@@ -1,9 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prometheus-test
-data:
-  prometheus-test.yml: |
+  name: prometheus-copy
+  prometheus-copy.yml: |
     global:
       scrape_interval:     10s
       external_labels:
