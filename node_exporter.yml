@@ -1,40 +1,46 @@
-global:
-  scrape_interval: 5s
-  scrape_timeout: 5s
-  evaluation_interval: 1m
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      scrape_timeout: 5s
+      evaluation_interval: 1m
 
-scrape_configs:
-- job_name: 'node-exporters'
-  scrape_interval: 5s
+    scrape_configs:
+    - job_name: 'node-exporters'
+      scrape_interval: 5s
 
-  metrics_path: /metrics
-  scheme: http
+      metrics_path: /metrics
+      scheme: http
 
-  kubernetes_sd_configs:
-  - api_server: null
-    role: node
-    namespaces:
-      names:
-      - mod-pm-dev-02
-      
-  tls_config:
-    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    insecure_skip_verify: true
-    
-  relabel_configs:
-  - separator: ;
-    regex: __meta_kubernetes_node_label_(.+)
-    replacement: $1
-    action: labelmap
-  - source_labels: [__meta_kubernetes_role]
-    separator: ;
-    regex: (.*)
-    target_label: kubernetes_role
-    replacement: $1
-    action: replace
-  - source_labels: [__address__]
-    separator: ;
-    regex: (.*):10250
-    target_label: __address__
-    replacement: ${1}:9100
-    action: replace
+      kubernetes_sd_configs:
+      - api_server: null
+        role: node
+        namespaces:
+          names:
+          - mod-pm-dev-02
+
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+
+      relabel_configs:
+      - separator: ;
+        regex: __meta_kubernetes_node_label_(.+)
+        replacement: $1
+        action: labelmap
+      - source_labels: [__meta_kubernetes_role]
+        separator: ;
+        regex: (.*)
+        target_label: kubernetes_role
+        replacement: $1
+        action: replace
+      - source_labels: [__address__]
+        separator: ;
+        regex: (.*):10250
+        target_label: __address__
+        replacement: ${1}:9100
+        action: replace
